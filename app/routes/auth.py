@@ -27,7 +27,7 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="Email já cadastrado")
 
-    new_user = User(nome=user.nome, email=user.email, senha_hash=hash_password(user.senha))
+    new_user = User(name=user.name, email=user.email, password_hash=hash_password(user.password))
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -38,7 +38,7 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     # OAuth2PasswordRequestForm espera fields username e password
     user = db.query(User).filter(User.email == form.username).first()
-    if not user or not verify_password(form.password, user.senha_hash):
+    if not user or not verify_password(form.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas")
     token = create_access_token(subject=str(user.id))
     return {"access_token": token, "token_type": "bearer"}

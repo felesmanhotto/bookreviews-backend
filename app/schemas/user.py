@@ -1,13 +1,13 @@
 from pydantic import BaseModel, EmailStr
 
 class UserCreate(BaseModel):
-    nome: str
+    name: str
     email: EmailStr
-    senha: str
+    password: str
 
 class UserPublic(BaseModel):
     id: int
-    nome: str
+    name: str
     email: EmailStr
     class Config:
         from_attributes = True  # pydantic permite retornar ORM

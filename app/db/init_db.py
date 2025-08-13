@@ -1,5 +1,8 @@
 from app.db.database import Base, engine
 from app.models.user import User
+from app.models.book import Book
+from app.models.review import Review
+from app.models.comment import Comment
 
 def init_db():
     print("Conectando ao banco...")
