@@ -2,5 +2,6 @@ source venv/bin/activate
 uvicorn app.main:app --reload
 
 
-psql -> \dn - \l - \dt
+sudo -u postgres psql -d bookreviews
+\dn - \l - \dt
 

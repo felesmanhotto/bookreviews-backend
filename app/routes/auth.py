@@ -8,18 +8,10 @@ from app.models.user import User
 from app.schemas.user import UserCreate, UserPublic, Token
 from app.core.security import hash_password, verify_password, create_access_token
 from app.core.config import get_settings
+from app.dependencies import get_db
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
-
-# dependência para obter sessão do DB
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 
 @router.post("/signup", response_model=UserPublic, status_code=201)
 def signup(user: UserCreate, db: Session = Depends(get_db)):
