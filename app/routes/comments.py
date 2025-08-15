@@ -21,7 +21,7 @@ def create_comment(review_id: int, payload: CommentCreate, db: Session = Depends
     db.refresh(c)
     return c
 
-@router.get("rewview/{review.id}", response_model=list[CommentPublic])
+@router.get("review/{review.id}", response_model=list[CommentPublic])
 def list_comments(review_id: int, db: Session=Depends(get_db)):
     qs = (db.query(Comment)
           .filter(Comment.review_id == review_id)

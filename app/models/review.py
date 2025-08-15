@@ -21,3 +21,4 @@ class Review(Base):
     user = relationship("User", back_populates="reviews")
     book = relationship("Book", back_populates="reviews")
     comments = relationship("Comment", back_populates="review", cascade="all, delete-orphan")
+    likes = relationship("ReviewLike", back_populates="review", cascade="all, delete-orphan")
