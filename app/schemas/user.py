@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from datetime import datetime
 
 class UserCreate(BaseModel):
     name: str
@@ -8,7 +9,8 @@ class UserCreate(BaseModel):
 class UserPublic(BaseModel):
     id: int
     name: str
-    email: EmailStr
+    created_at: datetime
+    bio: str | None = None
     class Config:
         from_attributes = True  # pydantic permite retornar ORM
 
