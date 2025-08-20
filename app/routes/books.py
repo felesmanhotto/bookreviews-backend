@@ -16,12 +16,12 @@ OPENLIBRARY_COVER = "https://covers.openlibrary.org/b/id/{cover_id}-L.jpg"
 async def search_books(q: str = Query(..., min_length=2), db: Session = Depends(get_db)):
     # Busca na OpenLibrary (simplificada). Vamos retornar e também preparar cache básico.
     async with httpx.AsyncClient(timeout=15) as client:
-        r = await client.get(OPENLIBRARY_SEARCH, params={"q": q, "limit": 10})
+        r = await client.get(OPENLIBRARY_SEARCH, params={"q": q, "limit": 12})
         r.raise_for_status()
         data = r.json()
 
     results: list[BookPublic] = []
-    for doc in data.get("docs", [])[:10]:
+    for doc in data.get("docs", [])[:12]:
         work_key = doc.get("key")  # ex: "/works/OL82563W"
         if not work_key or not work_key.startswith("/works/"):
             continue

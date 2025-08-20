@@ -9,7 +9,7 @@ from app.dependencies import get_db
 
 router = APIRouter(prefix="/reviews", tags=["review-likes"])
 
-@router.post("/review/{review_id}", status_code=201)
+@router.post("/{review_id}/like", status_code=200)
 def like_review(review_id: int, db: Session=Depends(get_db), current_user=Depends(get_current_user)):
     rev = db.get(Review, review_id)
     if not rev:
@@ -36,3 +36,14 @@ def like_review(review_id: int, db: Session=Depends(get_db), current_user=Depend
 def count_likes(review_id: int, db: Session = Depends(get_db)):
     count = db.query(func.count(ReviewLike.id)).filter(ReviewLike.review_id == review_id).scalar()
     return {"review_id": review_id, "likes": count or 0}
+
+
+@router.get("/{review_id}/likes/me")
+def liked_by_me(review_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    liked = (
+         db.query(ReviewLike)
+        .filter(ReviewLike.review_id == review_id, ReviewLike.user_id == current_user.id)
+        .first()
+    )
+
+    return {"liked": bool(liked)}
