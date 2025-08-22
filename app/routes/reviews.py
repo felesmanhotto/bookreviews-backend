@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 from app.db.database import SessionLocal
 from app.models.book import Book
 from app.models.review import Review
-from app.schemas.review import ReviewCreate, ReviewPublic
+from app.schemas.review import ReviewCreate, ReviewPublic, ReviewEdit
 from app.routes.auth import get_current_user 
 from app.dependencies import get_db
 import httpx
@@ -74,26 +74,57 @@ async def create_review(
     return review
 
 
+@router.put("/{review_id}", response_model=ReviewPublic)
+def edit_review(review_id: int, payload: ReviewEdit, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    rev = db.query(Review).options(joinedload(Review.book)).filter(Review.id == review_id).first()
+    if not rev:
+        raise HTTPException(status_code=400, detail="Review not found")
+    if rev.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not allowed")
+    
+    rev.content = payload.content if payload.content is not None else rev.content
+    rev.rating = payload.rating if payload.rating is not None else rev.rating
+
+    db.commit()
+    db.refresh(rev)
+    return rev
+
+
+@router.delete("/{review_id}", status_code=204)
+def delete_review(review_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    rev = db.get(Review, review_id)
+    if not rev:
+        raise HTTPException(status_code=400, detail="Review not found")
+    if rev.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not allowed")
+    
+    db.delete(rev)
+    db.commit()
+
+    return
+
 @router.get("/book/{olid}", response_model=list[ReviewPublic])
-def list_reviews_by_book(olid: str, db: Session = Depends(get_db)):
+def list_reviews_by_book(olid: str, db: Session = Depends(get_db), limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0)):
     qs = (
         db.query(Review)
         .options(joinedload(Review.book))
         .filter(Review.book_id == olid)
         .order_by(Review.id.desc())
-        .limit(10)
+        .limit(limit)
+        .offset(offset)
         .all()
     )
     return qs
 
 
 @router.get("/feed", response_model=list[ReviewPublic])
-def recent_reviews(db: Session = Depends(get_db)):
+def recent_reviews(db: Session = Depends(get_db), limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0)):
     qs = (
         db.query(Review)
         .options(joinedload(Review.book))
         .order_by(Review.created_at.desc())
-        .limit(20)
+        .limit(limit)
+        .offset(offset)
         .all()
     )
     return qs
