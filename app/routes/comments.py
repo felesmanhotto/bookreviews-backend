@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from app.db.database import SessionLocal
 from app.models.comment import Comment
@@ -21,11 +21,13 @@ def create_comment(review_id: int, payload: CommentCreate, db: Session = Depends
     db.refresh(c)
     return c
 
-@router.get("review/{review.id}", response_model=list[CommentPublic])
-def list_comments(review_id: int, db: Session=Depends(get_db)):
+@router.get("/review/{review_id}", response_model=list[CommentPublic])
+def list_comments(review_id: int, db: Session=Depends(get_db), limit: int = Query(10, ge=1, le=100), offset: int = Query(0, ge=0),):
     qs = (db.query(Comment)
           .filter(Comment.review_id == review_id)
           .order_by(Comment.created_at.desc())
+          .limit(limit)
+          .offset(offset)
           .all())
     
     return qs

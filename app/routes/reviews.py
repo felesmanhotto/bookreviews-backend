@@ -128,3 +128,17 @@ def recent_reviews(db: Session = Depends(get_db), limit: int = Query(20, ge=1, l
         .all()
     )
     return qs
+
+
+@router.get("/{review_id}", response_model=ReviewPublic)
+def get_review_detail(review_id: int, db: Session = Depends(get_db)):
+    
+    review = (
+        db.query(Review)
+        .options(joinedload(Review.book))
+        .filter(Review.id == review_id)
+        .first()
+    )
+    if not review:
+        raise HTTPException(404, "Review not found")
+    return review
