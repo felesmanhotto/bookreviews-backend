@@ -40,6 +40,7 @@ def count_likes(review_id: int, db: Session = Depends(get_db)):
 
 @router.get("/{review_id}/likes/me")
 def liked_by_me(review_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+
     liked = (
          db.query(ReviewLike)
         .filter(ReviewLike.review_id == review_id, ReviewLike.user_id == current_user.id)

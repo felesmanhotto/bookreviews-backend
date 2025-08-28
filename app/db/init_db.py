@@ -4,6 +4,7 @@ from app.models.book import Book
 from app.models.review import Review
 from app.models.comment import Comment
 from app.models.review_like import ReviewLike
+from app.models.follow import Follow
 
 
 def init_db():

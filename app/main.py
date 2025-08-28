@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth, books, reviews, comments, users, review_likes
+from app.routes import auth, books, reviews, comments, users, review_likes, follows
 
 app = FastAPI()
 
@@ -22,3 +22,4 @@ app.include_router(reviews.router)
 app.include_router(comments.router)
 app.include_router(users.router)
 app.include_router(review_likes.router)
+app.include_router(follows.router)
