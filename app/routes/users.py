@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 from app.db.database import SessionLocal
 from app.routes.auth import get_current_user
 from app.models.user import User
 from app.models.review import Review
+from app.models.follow import Follow
 from app.schemas.review import ReviewPublic
 from app.dependencies import get_db
 from app.schemas.user import UserPublic
@@ -53,3 +55,27 @@ def get_user_reviews(user_id: int, db:Session = Depends(get_db), limit: int = Qu
     )
 
     return qs
+
+@router.get("/{user_id}/reviewcount")
+def get_user_reviewcount(user_id: int, db: Session=Depends(get_db)):
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    count = (
+        db.query(func.count(Review.id)).filter(Review.user_id==user_id).scalar()
+    )
+
+    return count
+
+@router.get("/{user_id}/followcount")
+def get_user_followcount(user_id: int, db: Session=Depends(get_db)):
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    count = (
+        db.query(func.count(Follow.id).filter(Follow.following_id==user_id).scalar())
+    )
+
+    return count
