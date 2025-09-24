@@ -56,26 +56,22 @@ def get_user_reviews(user_id: int, db:Session = Depends(get_db), limit: int = Qu
 
     return qs
 
-@router.get("/{user_id}/reviewcount")
-def get_user_reviewcount(user_id: int, db: Session=Depends(get_db)):
+@router.get("/{user_id}/counters")
+def get_user_counters(user_id: int, db: Session = Depends(get_db)):
     user = db.get(User, user_id)
     if not user:
         raise HTTPException(404, "User not found")
 
-    count = (
-        db.query(func.count(Review.id)).filter(Review.user_id==user_id).scalar()
+    followers = (
+        db.query(func.count(Follow.id))
+        .filter(Follow.following_id == user_id)
+        .scalar()
+        or 0
     )
-
-    return count
-
-@router.get("/{user_id}/followcount")
-def get_user_followcount(user_id: int, db: Session=Depends(get_db)):
-    user = db.get(User, user_id)
-    if not user:
-        raise HTTPException(404, "User not found")
-
-    count = (
-        db.query(func.count(Follow.id).filter(Follow.following_id==user_id).scalar())
+    reviews = (
+        db.query(func.count(Review.id))
+        .filter(Review.user_id == user_id)
+        .scalar()
+        or 0
     )
-
-    return count
+    return {"followers": followers, "reviews": reviews}
